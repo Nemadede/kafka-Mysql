@@ -27,7 +27,9 @@ MySQLdb database = new MySQLdb(databaseConfig);
        consumerProps.load(new FileInputStream(consumerConfig));
        ConsumerGroup consumerGroup = new ConsumerGroup(consumerProps, database);
        List<Consumer> consumers = new ArrayList<>();
-       for (int i = 0; i < Integer.parseInt(consumerProps.getProperty("number.of.consumers")); i++) {
+       int cores = Runtime.getRuntime().availableProcessors();
+       System.out.println(cores);
+       for (int i = 0; i < cores; i++) {
            consumers.add(new ConsumerThread(consumerProps,database,1));
            consumers.add(new ConsumerThread(consumerProps,database,2));
        }

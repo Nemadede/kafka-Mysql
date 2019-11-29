@@ -43,9 +43,9 @@ public class ProducerThreadTest {
         ProducerGroup producerGroup = new ProducerGroup(properties,configClass);
         List<Producer> producers = new ArrayList<>();
 //        producers.add(new ProducerThread(properties,user,host,db,password,count));
-
-
-        for(int i = 0; i < Integer.parseInt(properties.getProperty("number.of.producer")); i++){
+        int cores = Runtime.getRuntime().availableProcessors();
+System.out.println(cores);
+        for(int i = 0; i < cores; i++){
             producers.add(new ProducerThread(properties,user,host,db,password,count,comName));
             producers.add(new ProducerThread(properties, user2, host2, db2, password2, count2,comName2));
         }
