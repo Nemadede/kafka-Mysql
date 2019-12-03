@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 
 public class ProducerThreadTest {
 
@@ -19,53 +20,47 @@ public class ProducerThreadTest {
     String db ="demodb";
     String user = "demodb@demo.com";
     String password = "123456";
-    Integer count = 1; // assuming that each user will have an Id which will define the partition which the user's data will be on
+    Integer userId1 = 1; // assuming that each user will have an Id which will define the partition which the user's data will be on
     String comName = "NemaLove"; // company name which will be used to name sales table
 
     String host2 = "http://192.168.1.15:8069"; //user's odoo configurations
     String db2 ="demodb";
     String user2 = "demodb@demo.com";
     String password2 = "123456";
-    Integer count2 = 2; // assuming that each user will have an Id which will define the partition which the user's data will be on
+    Integer userId2 = 2; // assuming that each user will have an Id which will define the partition which the user's data will be on
     String comName2 = "GLOXON"; // company name which will be used to name sales table
     ConfigClass configClass;
+
 
     @Test
     public void testClass() {
         properties.put("bootstrap.servers","127.0.0.1:9092");
         properties.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("topic","odooGroup");
+        properties.put("topic","odooGroup1");
         System.out.println(properties);
-        properties.put("number.of.producer","3");
-//        producerThread.run();
+
+
 
         ProducerGroup producerGroup = new ProducerGroup(properties,configClass);
         List<Producer> producers = new ArrayList<>();
-//        producers.add(new ProducerThread(properties,user,host,db,password,count));
         int cores = Runtime.getRuntime().availableProcessors();
-System.out.println(cores);
+            System.out.println(cores);
         for(int i = 0; i < cores; i++){
-            producers.add(new ProducerThread(properties,user,host,db,password,count,comName));
-            producers.add(new ProducerThread(properties, user2, host2, db2, password2, count2,comName2));
+            producers.add(new ProducerThread(properties,user,host,db,password, userId1,comName));
+            producers.add(new ProducerThread(properties, user2, host2, db2, password2, userId2,comName2));
         }
         producerGroup.assignListProducer(producers);
         producerGroup.run();
     }
 
-//    @Test
-//    public void testClass2(){
-//        properties.put("bootstrap.servers","127.0.0.1:9092");
-//        properties.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
-//        properties.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
-//        properties.put("topic","odooGroup");
-//        properties.put("number.of.producer","3");
-//        ProducerGroup producerGroup = new ProducerGroup(properties,configClass);
-//        List<Producer> producers = new ArrayList<>();
-//        for(int i = 0; i < Integer.parseInt(properties.getProperty("number.of.producer")); i++) {
-//            producers.add(new ProducerThread(properties, user2, host2, db2, password2, count2,comName2));
-//        }
-//        producerGroup.assignListProducer(producers);
-//        producerGroup.run();
-//    }
+   @Test
+    public void main() {
+        Scanner scanner = new Scanner(System.in);
+        String t = scanner.next("Peter Paul");
+        int p = scanner.nextInt(1234);
+        System.out.println("here is " +t+ "with number" +p);
+
+    }
+
 }

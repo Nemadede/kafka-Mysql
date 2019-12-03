@@ -12,11 +12,12 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.concurrent.ManagedTask;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 import static java.util.Arrays.asList;
 
@@ -28,16 +29,29 @@ OdooApiClient odooApiClient;
     private final String topic;
      Integer partition;
     Users users;
+    CustomPartition customPartition = new CustomPartition();
 
-
-    public ProducerThread(Properties properties, String user,String host, String dbName,String password,Integer count,String companyName) {
+    String user;
+    String host;
+    String dbName;
+    String password;
+    Integer userIdNum;
+    String companyName;
+    public ProducerThread(Properties properties, String user,String host, String dbName,String password,Integer userIdNum,String companyName) {
 
 
         this.topic = properties.getProperty("topic");
-        users = new Users(user,host,dbName,password,count,companyName);
+//        users = new Users(user,host,dbName,password,userIdNum,companyName);
         producer = new KafkaProducer<String,String>(properties);
         logger.info("Producer initialized");
-        this.partition = count;
+        this.partition = userIdNum;
+        this.user= user;
+        this.host = host;
+        this.dbName = dbName;
+        this.password=password;
+        this.userIdNum =userIdNum;
+        this.companyName = companyName;
+
 
     }
 
@@ -47,8 +61,8 @@ OdooApiClient odooApiClient;
 
 
         odooApiClient =new OdooApiClient();
-        System.out.println(users.getDatabase());
-        odooApiClient.login(users.getHost(),users.getDatabase(),users.getUser(),users.getPassword());
+        System.out.println(this.dbName);
+        odooApiClient.login(this.host,this.dbName,this.user,this.password);
 
         ProducerRecord<String, String> record = null;
         Object obj = odooApiClient.executeMethod( "sale.order","search_read",asList(asList(
@@ -61,9 +75,9 @@ OdooApiClient odooApiClient;
         JSONArray arrayObj = new JSONArray(strObj);
         for(Object eachObj: arrayObj){
                 String string = JSON.toJSONString(eachObj);
-                List key = asList(users.getCompanyName(),users.setId().toString());
+                List key = asList(this.companyName,this.userIdNum.toString());
 //            record = new ProducerRecord("odoo",string);                                                                         //without key specified
-            record = new ProducerRecord("odooGroup",partition,key.toString(),string);                                 //specify key and partition
+            record = new ProducerRecord(this.topic,partition,key.toString(),string);                                 //specify key and partition
 //            record = new ProducerRecord("odoo",users.setId().toString(),string);                                              //specify key only
 
 

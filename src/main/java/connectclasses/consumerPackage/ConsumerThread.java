@@ -2,6 +2,7 @@ package connectclasses.consumerPackage;
 
 import connectclasses.apiClients.Database;
 import connectclasses.common.MessageObject;
+import connectclasses.producerPackage.CustomPartition;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -30,6 +31,7 @@ public class ConsumerThread implements Consumer {
     private List<ConsumerRecord<String,MessageObject>> buffer = new ArrayList<>();
 
     private Database database;
+    private CustomPartition customPartition;
 
     public ConsumerThread(Properties properties, Database database,Integer part){
         this.database = database;
@@ -37,29 +39,31 @@ public class ConsumerThread implements Consumer {
         this.bootstrapServer = properties.getProperty("bootstrap.servers");
         this.groupID = properties.getProperty("group.id");
         this.topic = properties.getProperty("topic");
+
         this.consumer = new KafkaConsumer<String, MessageObject>(properties,new StringDeserializer(),new JsonDeserializer(MessageObject.class));
 //        this.consumer = new KafkaConsumer<>(properties);
         this.parti = new TopicPartition(this.topic,part);
+        customPartition.createPartitions(this.topic,part,properties);
 //        this.consumer.subscribe(Collections.singletonList(this.topic));
-        this.consumer.assign(Collections.singleton(parti));
+        this.consumer.assign(Collections.singleton(this.parti));
         this.minBatchSize = Long.parseLong(properties.getProperty("min.batch.size"));
 
     }
 
     public String topic() {
-        return null;
+        return this.topic;
     }
 
     public String groupID() {
-        return null;
+        return this.groupID;
     }
 
     public String bootstrapServer() {
-        return null;
+        return this.bootstrapServer;
     }
 
     public long position(TopicPartition partition) {
-        return 0;
+        return this.part;
     }
 
     public void seek(TopicPartition partition, long offset) {
@@ -92,7 +96,6 @@ public class ConsumerThread implements Consumer {
                     try {
                         System.out.println("This is the buffer_______" + buffer);
 
-//                        database.insertMessageToDB(buffer);
 
                         if (buffer.size() >= this.minBatchSize) {
                             database.insertMessageToDB(buffer);

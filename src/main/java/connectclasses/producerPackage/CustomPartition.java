@@ -2,10 +2,14 @@ package connectclasses.producerPackage;
 
 import connectclasses.apiClients.Users;
 import connectclasses.common.ConfigClass;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewPartitions;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class CustomPartition implements Partitioner {
     Users users = new Users();
@@ -27,5 +31,16 @@ public class CustomPartition implements Partitioner {
     @Override
     public void configure(Map<String, ?> map) {
 
+    }
+
+    public static void createPartitions(String topicName, int numPartitions, Properties props) {
+//        Properties props = new Properties();
+//        props.put("bootstrap.servers","localhost:9092");
+        AdminClient adminClient = AdminClient.create(props);
+
+        Map<String, NewPartitions> newPartitionSet = new HashMap<>();
+        newPartitionSet.put(topicName, NewPartitions.increaseTo(numPartitions));
+        adminClient.createPartitions(newPartitionSet);
+        adminClient.close();
     }
 }

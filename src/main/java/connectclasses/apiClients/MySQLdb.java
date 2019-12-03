@@ -111,6 +111,7 @@ public class MySQLdb  implements Database {
         return 0;
     }
 
+
     public boolean isTableExisting(String tableName) throws SQLException {
         boolean tableExists = false;
         Connection con = db.getConnection();
