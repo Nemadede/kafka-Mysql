@@ -50,6 +50,7 @@ public class ProducerGroup {
             Thread thread = new Thread(producer);
             thread.start();
 
+
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -58,6 +59,7 @@ public class ProducerGroup {
             logger.info("Consumer Group has exited");
         }));
         await(latch);
+
     }
 
 

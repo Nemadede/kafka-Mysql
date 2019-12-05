@@ -37,7 +37,8 @@ public class ProducerThreadTest {
         properties.put("bootstrap.servers","127.0.0.1:9092");
         properties.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("topic","odooGroup1");
+        properties.put("topic","odooGroup");
+//        properties.put("transactional.id",userId1.toString());
         System.out.println(properties);
 
 
@@ -48,19 +49,12 @@ public class ProducerThreadTest {
             System.out.println(cores);
         for(int i = 0; i < cores; i++){
             producers.add(new ProducerThread(properties,user,host,db,password, userId1,comName));
-            producers.add(new ProducerThread(properties, user2, host2, db2, password2, userId2,comName2));
+//            producers.add(new ProducerThread(properties, user2, host2, db2, password2, userId2,comName2));
         }
         producerGroup.assignListProducer(producers);
         producerGroup.run();
     }
 
-   @Test
-    public void main() {
-        Scanner scanner = new Scanner(System.in);
-        String t = scanner.next("Peter Paul");
-        int p = scanner.nextInt(1234);
-        System.out.println("here is " +t+ "with number" +p);
 
-    }
 
 }

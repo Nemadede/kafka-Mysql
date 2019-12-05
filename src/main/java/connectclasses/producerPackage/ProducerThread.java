@@ -28,7 +28,8 @@ OdooApiClient odooApiClient;
     private final Logger logger = LoggerFactory.getLogger(ProducerThread.class);
     private final String topic;
      Integer partition;
-    Users users;
+     Integer pK;
+
     CustomPartition customPartition = new CustomPartition();
 
     String user;
@@ -37,11 +38,11 @@ OdooApiClient odooApiClient;
     String password;
     Integer userIdNum;
     String companyName;
+
     public ProducerThread(Properties properties, String user,String host, String dbName,String password,Integer userIdNum,String companyName) {
 
 
         this.topic = properties.getProperty("topic");
-//        users = new Users(user,host,dbName,password,userIdNum,companyName);
         producer = new KafkaProducer<String,String>(properties);
         logger.info("Producer initialized");
         this.partition = userIdNum;
@@ -51,59 +52,18 @@ OdooApiClient odooApiClient;
         this.password=password;
         this.userIdNum =userIdNum;
         this.companyName = companyName;
+        this.odooApiClient = new OdooApiClient();
 
 
-    }
-
-
-
-    public void run() {
-
-
-        odooApiClient =new OdooApiClient();
         System.out.println(this.dbName);
-        odooApiClient.login(this.host,this.dbName,this.user,this.password);
+//        producer.initTransactions();
+        this.odooApiClient.login(this.host,this.dbName,this.user,this.password); //login with credentials
 
-        ProducerRecord<String, String> record = null;
-        Object obj = odooApiClient.executeMethod( "sale.order","search_read",asList(asList(
-                asList("require_payment", "=", "true"))),
-                new HashMap() {{
-                    put("fields", asList("id","amount_tax", "amount_total", "amount_untaxed","invoice_status"));
-
-                }});
-        String strObj = JSON.toJSONString(obj);
-        JSONArray arrayObj = new JSONArray(strObj);
-        for(Object eachObj: arrayObj){
-                String string = JSON.toJSONString(eachObj);
-                List key = asList(this.companyName,this.userIdNum.toString());
-//            record = new ProducerRecord("odoo",string);                                                                         //without key specified
-            record = new ProducerRecord(this.topic,partition,key.toString(),string);                                 //specify key and partition
-//            record = new ProducerRecord("odoo",users.setId().toString(),string);                                              //specify key only
-
-
-            System.out.println("see this___________" + record);
-
-//            producer.send(record); // this or the try statement below
-
-            try {
-                System.out.println("Entered try method");
-                producer.send(record,(new Callback() {
-                    public void onCompletion(RecordMetadata rec, Exception ex) {
-//                    logger.info("Partition ",rec.partition());
-                        if (ex != null) {
-                            logger.error("Error While processing", ex);
-                        }
-                    }
-                })).get();
-
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            } catch (ExecutionException ex) {
-                ex.printStackTrace();
-            }
-        }
 
     }
+
+
+    int dataLength = 0;
 
     @Override
     public void setLatch(CountDownLatch latch) {
@@ -117,7 +77,108 @@ OdooApiClient odooApiClient;
 
     @Override
     public Integer savedLastRecord(String pK) {
-        return null;
+        return this.pK;
     }
 
+
+public JSONArray getData(){
+    JSONArray arrayObj = null;
+//pull data from odoo using odoo ApI client
+    Object obj = this.odooApiClient.executeMethod( "sale.order","search_read",asList(asList(
+            asList("require_payment", "=", "true"))),
+            new HashMap() {{
+                put("fields", asList("id","amount_tax", "amount_total", "amount_untaxed","invoice_status"));
+
+            }});
+
+        try{
+            String strObj = JSON.toJSONString(obj);
+            arrayObj = new JSONArray(strObj);
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
+    return arrayObj;
 }
+
+
+    public void run() {
+       try {
+
+           ProducerRecord<String, String> record = null;
+           JSONArray recordObj = getData();
+           int lastUpdated_length = getData().length();
+           System.out.println(lastUpdated_length);
+
+           // do first pull and send to topic
+           for(Object eachOj: recordObj){
+               String string = JSON.toJSONString(eachOj);
+               List key = asList(this.companyName,this.userIdNum.toString());
+               record = new ProducerRecord(this.topic,partition,key.toString(),string);                                 //specify key and partition of each record
+               try {
+                   producer.send(record,(new Callback() {
+                       public void onCompletion(RecordMetadata rec, Exception ex) {
+
+                           if (ex != null) {
+                               logger.error("Error While processing", ex);
+                           }
+                       }
+                   })).get();
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               } catch (ExecutionException e) {
+                   e.printStackTrace();
+               }
+           }
+
+
+// enter the forever loop which only sends data to the topic if there's an update
+           while (true)
+           {
+               JSONArray dataRecord = getData();
+               int currentPullLength = dataRecord.length();
+
+               if(lastUpdated_length == currentPullLength){
+                   continue;
+               }
+               // else statement handling data pull on update
+               else
+               {
+                   System.out.println("Update ohhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" + lastUpdated_length + currentPullLength);
+                   for(Object eachObj : dataRecord){
+
+                       String recordString = JSON.toJSONString(eachObj);
+                       List recordkey = asList(this.companyName,this.userIdNum.toString());
+
+                       record = new ProducerRecord(this.topic,partition,recordkey.toString(),recordString);                                 //specify key and partition of each record
+
+                       producer.send(record,(new Callback() {
+                           public void onCompletion(RecordMetadata rec, Exception ex) {
+
+                               if (ex != null) {
+                                   logger.error("Error While processing", ex);
+                               }
+                           }
+                       }));
+                   }
+                   lastUpdated_length = dataRecord.length(); //update the record value to the last update count
+               }
+
+
+           }
+       } finally
+           {
+           this.producer.close();
+       }
+
+    }
+
+
+    }
+
+
+
+
+
+
+
+

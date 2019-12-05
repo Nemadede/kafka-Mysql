@@ -113,6 +113,7 @@ private Properties cProperties(){
         }).thenRun(() ->{
             System.out.println("Out of the loop2");
         });
+
         future.join();
         future2.join();
 

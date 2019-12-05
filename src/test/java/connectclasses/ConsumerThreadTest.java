@@ -31,11 +31,11 @@ MySQLdb database = new MySQLdb(databaseConfig);
        System.out.println(cores);
        for (int i = 0; i < cores; i++) {
            consumers.add(new ConsumerThread(consumerProps,database,1));
-           consumers.add(new ConsumerThread(consumerProps,database,2));
+//           consumers.add(new ConsumerThread(consumerProps,database,2));
        }
 
        consumerGroup.assignListConsumers(consumers);
-//       consumerGroup.run();
+       consumerGroup.run();
    }
 
 

@@ -78,27 +78,20 @@ public class ConsumerThread implements Consumer {
     public void run() {
         try {
             while (true){
+                // pull record from topic
                 ConsumerRecords<String, MessageObject> records = this.consumer.poll(Duration.ofMillis(1000));
-                System.out.println("This is the records +++++_______" + records);
-
-            System.out.println("This is the buffer_______" + buffer);
 
            int i= records.count();
 
-           System.out.println("number ___________ " + i);
-
                 for( ConsumerRecord<String, MessageObject> record: records){
-                    System.out.println("Check this out" + record);
-                    System.out.println("Im in here now");
+                    //add record to the buffer
                     buffer.add(record);
                 }
 
                     try {
-                        System.out.println("This is the buffer_______" + buffer);
-
 
                         if (buffer.size() >= this.minBatchSize) {
-                            database.insertMessageToDB(buffer);
+                            database.insertMessageToDB(buffer); // insert into the database
                             buffer.clear();
                         }
                     } catch (Exception e) {
