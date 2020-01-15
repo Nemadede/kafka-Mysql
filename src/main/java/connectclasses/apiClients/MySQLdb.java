@@ -65,7 +65,7 @@ public class MySQLdb  implements Database {
             insertData(records);
         }
 //        String query = "INSERT IGNORE INTO "+this.tableName+" (id,amount_tax,amount_total,amount_untaxed,invoice_status) VALUE (?,?,?,?,?) ON DUPLICATE KEY UPDATE id";
-
+            connection.close();
 
     }
 
@@ -83,9 +83,9 @@ public class MySQLdb  implements Database {
             messageObject.fromJson(jsonObject);
 //            System.out.println("Now we are here hurray");
             preparedStatement.setInt(1,messageObject.fromJson(jsonObject).getId());
-            preparedStatement.setInt(2, messageObject.fromJson(jsonObject).getAmount_tax());
-            preparedStatement.setInt(3, messageObject.fromJson(jsonObject).getAmount_total());
-            preparedStatement.setInt(4, messageObject.fromJson(jsonObject).getAmount_untaxed());
+            preparedStatement.setFloat(2, messageObject.fromJson(jsonObject).getAmount_tax());
+            preparedStatement.setFloat(3, messageObject.fromJson(jsonObject).getAmount_total());
+            preparedStatement.setFloat(4, messageObject.fromJson(jsonObject).getAmount_untaxed());
             preparedStatement.setString(5, messageObject.fromJson(jsonObject).getInvoice_status());
             preparedStatement.addBatch();
 

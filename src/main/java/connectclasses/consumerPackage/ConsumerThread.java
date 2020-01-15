@@ -84,7 +84,7 @@ public class ConsumerThread implements Consumer {
            int i= records.count();
 
                 for( ConsumerRecord<String, MessageObject> record: records){
-                    //add record to the buffer
+
                     buffer.add(record);
                 }
 

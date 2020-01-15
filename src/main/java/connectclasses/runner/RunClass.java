@@ -55,7 +55,8 @@ public class RunClass implements Runnable {
 
     return properties;
 }
-private Properties cProperties(){
+
+    private Properties cProperties(){
     Properties properties = new Properties();
     properties.put("bootstrap.servers","127.0.0.1:9092");
     properties.put("group.id", "group1");
@@ -66,6 +67,7 @@ private Properties cProperties(){
     properties.put("min.batch.size","1");
     return properties;
 }
+
 // Variables
     private Properties consumerProps = cProperties();
     private Properties producerProps = pProperties();

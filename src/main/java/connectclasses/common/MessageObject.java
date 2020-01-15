@@ -9,41 +9,43 @@ import org.json.JSONObject;
 
 public class MessageObject {
 
-    private Integer amount_tax;
-    private Integer amount_total;
-    private Integer amount_untaxed;
+    private Float amount_tax;
+    private Float amount_total;
+    private Float amount_untaxed;
     private String invoice_status;
     private Integer id;
+    private Integer company_id;
     public MessageObject(){}
-    public MessageObject(Integer amount_tax, Integer amount_total, Integer amount_untaxed, String invoice_status, Integer id) {
+    public MessageObject(Float amount_tax, Float amount_total, Float amount_untaxed, String invoice_status, Integer id, Integer company_id) {
         this.amount_tax = amount_tax;
         this.amount_total = amount_total;
         this.amount_untaxed = amount_untaxed;
         this.invoice_status = invoice_status;
         this.id = id;
+        this.company_id = company_id;
     }
 
-    public int getAmount_tax() {
+    public float getAmount_tax() {
         return amount_tax;
     }
 
-    public void setAmount_tax(int amount_tax) {
+    public void setAmount_tax(float amount_tax) {
         this.amount_tax = amount_tax;
     }
 
-    public int getAmount_total() {
+    public float getAmount_total() {
         return amount_total;
     }
 
-    public void setAmount_total(int amount_total) {
+    public void setAmount_total(float amount_total) {
         this.amount_total = amount_total;
     }
 
-    public int getAmount_untaxed() {
+    public float getAmount_untaxed() {
         return amount_untaxed;
     }
 
-    public void setAmount_untaxed(int amount_untaxed) {
+    public void setAmount_untaxed(float amount_untaxed) {
         this.amount_untaxed = amount_untaxed;
     }
 
@@ -63,6 +65,14 @@ public class MessageObject {
         this.id = id;
     }
 
+    public Integer getCompany_id() {
+        return company_id;
+    }
+
+    public void setCompany_id(Integer company_id) {
+        this.company_id = company_id;
+    }
+
     public static String SCHEMA_KEY = "TableKey";
     public static String SCHEMA_VALUE ="schema_name";
     public static String AMOUNT_TAX = "amount_tax";
@@ -70,6 +80,7 @@ public class MessageObject {
     public static String AMOUNT_UNTAXED = "amount_untaxed";
     public static String INVOICE_STATUS = "invoice_status";
     public static String SALE_ORDER_ID ="id";
+    public static String COMPANY_ID = "company_id";
 
 
     public static Schema KEY_SCHEMA = SchemaBuilder.struct()
@@ -83,16 +94,18 @@ public class MessageObject {
             .field( AMOUNT_UNTAXED , Schema.FLOAT32_SCHEMA)
             .field(INVOICE_STATUS,Schema.STRING_SCHEMA)
             .field(SALE_ORDER_ID,Schema.INT32_SCHEMA)
+            .field(COMPANY_ID,Schema.INT32_SCHEMA)
             .build();
 
 
     public static MessageObject fromJson(JSONObject jsonObject){
         MessageObject messageObject = new MessageObject();
-        messageObject.setAmount_tax(jsonObject.getInt(AMOUNT_TAX));
-        messageObject.setAmount_total(jsonObject.getInt(AMOUNT_TOTAL));
-        messageObject.setAmount_untaxed(jsonObject.getInt(AMOUNT_UNTAXED));
+        messageObject.setAmount_tax(jsonObject.getFloat(AMOUNT_TAX));
+        messageObject.setAmount_total(jsonObject.getFloat(AMOUNT_TOTAL));
+        messageObject.setAmount_untaxed(jsonObject.getFloat(AMOUNT_UNTAXED));
         messageObject.setInvoice_status(jsonObject.getString(INVOICE_STATUS));
         messageObject.setId(jsonObject.getInt(SALE_ORDER_ID));
+        messageObject.setCompany_id(jsonObject.getInt(COMPANY_ID));
         return messageObject;
     }
 }

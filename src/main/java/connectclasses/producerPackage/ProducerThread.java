@@ -23,12 +23,12 @@ import static java.util.Arrays.asList;
 
 
 public class ProducerThread implements Producer {
-OdooApiClient odooApiClient;
+    OdooApiClient odooApiClient;
     private final KafkaProducer<String, String> producer;
     private final Logger logger = LoggerFactory.getLogger(ProducerThread.class);
     private final String topic;
-     Integer partition;
-     Integer pK;
+    Integer partition;
+    Integer pK;
 
     CustomPartition customPartition = new CustomPartition();
 
